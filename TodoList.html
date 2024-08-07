@@ -11,10 +11,18 @@
     <div id="app">
         <h2>할 일 추가하기</h2>
         <input type="text" v-model="message" ref="inputRef">
-        <button @click="addTodo">추가하기</button>
+        <button @click="addTodo">추가하기</button><Br><br>
+
+        <label for="chkAll">
+            <input id="chkAll" type="checkbox" :checked="isAllChecked" @change="toggleAll">&nbsp;전체 선택<br>
+        </label>
+
         <ol>
             <li v-for="(todo, index) in todos" :key="index">
-                {{todo.text}} <button @click="deleteTodo(index)">삭제</button>
+                <label :for="'chk' + index">
+                    <input :id="'chk' + index" type="checkbox" v-model="todo.checked">
+                    {{todo.text}}
+                </label> <button @click="deleteTodo(index)">삭제</button>
             </li>
         </ol>
     </div>
@@ -22,26 +30,41 @@
     <script>
 
         // 인스턴스 생성
-        var app = new Vue({
+        new Vue({
             el: '#app',
             data: {
                 todos: [],
-                message: '',
-                
+                message: ''
             },
             methods: {
                 addTodo() {
                     if (this.message.trim()) {
-                        this.todos.push({ text: this.message });
+                        this.todos.push({ text: this.message, checked: false });
                         this.message = "";
-                        document.querySelector('#app > input').focus();
+                        this.$refs.inputRef.focus();
                     }
                 },
                 deleteTodo(index) {
                     this.todos.splice(index, 1);
                 },
+                toggleAll(event) {
+                    this.isAllChecked = event.target.checked;
+                }
             },
-        })
+            computed: {
+                isAllChecked: {
+                    get() {
+                        return this.todos.length > 0 && this.todos.every(todo => todo.checked);
+                    },
+                    set(value) {
+                        this.todos.forEach(todo => {
+                            todo.checked = value;
+                        });
+                    }
+                }
+            }
+        });
+
 
 
     </script>
