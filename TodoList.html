@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+    
+    <div id="app">
+        <h2>할 일 추가하기</h2>
+        <input type="text" v-model="message" ref="inputRef">
+        <button @click="addTodo">추가하기</button>
+        <ol>
+            <li v-for="(todo, index) in todos" :key="index">
+                {{todo.text}} <button @click="deleteTodo(index)">삭제</button>
+            </li>
+        </ol>
+    </div>
+
+    <script>
+
+        // 인스턴스 생성
+        var app = new Vue({
+            el: '#app',
+            data: {
+                todos: [],
+                message: '',
+                
+            },
+            methods: {
+                addTodo() {
+                    if (this.message.trim()) {
+                        this.todos.push({ text: this.message });
+                        this.message = "";
+                        document.querySelector('#app > input').focus();
+                    }
+                },
+                deleteTodo(index) {
+                    this.todos.splice(index, 1);
+                },
+            },
+        })
+
+
+    </script>
+
+    <style>
+        #app > ol > li{
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #app {
+            width: 250px;
+        }
+    </style>
+
+</body>
+</html>
