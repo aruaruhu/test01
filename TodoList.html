@@ -20,11 +20,11 @@
         <button @click="deleteSelection">선택 삭제</button>
 
         <ol>
-            <li v-for="(todo, index) in todos" :key="index">
-                <label :for="'chk' + index">
-                    <input :id="'chk' + index" type="checkbox" v-model="todo.checked">
+            <li v-for="(todo, id) in todos" :key="id">
+                <label :for="'chk' + id">
+                    <input :id="'chk' + id" type="checkbox" v-model="todo.checked">
                     {{todo.text}}
-                </label> <button @click="deleteTodo(index)">삭제</button>
+                </label> <button @click="deleteTodo(id)">삭제</button>
             </li>
         </ol>
     </div>
@@ -41,13 +41,13 @@
             methods: {
                 addTodo() {
                     if (this.message.trim()) {
-                        this.todos.push({ text: this.message, checked: false });
+                        this.todos.push({id: this.todos.length, text: this.message, checked: false });
                         this.message = "";
                         this.$refs.inputRef.focus();
                     }
                 },
-                deleteTodo(index) {
-                    this.todos.splice
+                deleteTodo(id) {
+                    this.todos.splice(id, 1);
                 },
                 toggleAll(event) {
                     this.isAllChecked = event.target.checked;
