@@ -14,8 +14,10 @@
         <button @click="addTodo">추가하기</button><Br><br>
 
         <label for="chkAll">
-            <input id="chkAll" type="checkbox" :checked="isAllChecked" @change="toggleAll">&nbsp;전체 선택<br>
+            <input id="chkAll" type="checkbox" :checked="isAllChecked" @change="toggleAll">&nbsp;전체 선택<br><br>
         </label>
+        <button @click="deleteAll">전부 삭제</button>
+        <button @click="deleteSelection">선택 삭제</button>
 
         <ol>
             <li v-for="(todo, index) in todos" :key="index">
@@ -45,11 +47,19 @@
                     }
                 },
                 deleteTodo(index) {
-                    this.todos.splice(index, 1);
+                    this.todos.splice
                 },
                 toggleAll(event) {
                     this.isAllChecked = event.target.checked;
-                }
+                },
+                deleteAll() {
+                    if(this.todos.length > 0) {
+                        this.todos = [];
+                    }
+                },
+                deleteSelection() {
+                    this.todos = this.todos.filter((todo) => !todo.checked);
+                },
             },
             computed: {
                 isAllChecked: {
@@ -76,8 +86,6 @@
         }
 
         #app {
-
-
             width: 250px;
         }
     </style>
