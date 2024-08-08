@@ -14,15 +14,17 @@
         <button @click="addTodo">추가하기</button><Br><br>
 
         <label for="chkAll">
-            <input id="chkAll" type="checkbox" :checked="isAllChecked" @change="toggleAll">&nbsp;전체 선택<br>
+            <input id="chkAll" type="checkbox" :checked="isAllChecked" @change="toggleAll">&nbsp;전체 선택<br><br>
         </label>
+        <button @click="deleteAll">전부 삭제</button>
+        <button @click="deleteSelection">선택 삭제</button>
 
         <ol>
-            <li v-for="(todo, index) in todos" :key="index">
-                <label :for="'chk' + index">
-                    <input :id="'chk' + index" type="checkbox" v-model="todo.checked">
+            <li v-for="(todo, id) in todos" :key="id">
+                <label :for="'chk' + id">
+                    <input :id="'chk' + id" type="checkbox" v-model="todo.checked">
                     {{todo.text}}
-                </label> <button @click="deleteTodo(index)">삭제</button>
+                </label> <button @click="deleteTodo(id)">삭제</button>
             </li>
         </ol>
     </div>
@@ -39,17 +41,25 @@
             methods: {
                 addTodo() {
                     if (this.message.trim()) {
-                        this.todos.push({ text: this.message, checked: false });
+                        this.todos.push({id: this.todos.length, text: this.message, checked: false });
                         this.message = "";
                         this.$refs.inputRef.focus();
                     }
                 },
-                deleteTodo(index) {
-                    this.todos.splice(index, 1);
+                deleteTodo(id) {
+                    this.todos.splice(id, 1);
                 },
                 toggleAll(event) {
                     this.isAllChecked = event.target.checked;
-                }
+                },
+                deleteAll() {
+                    if(this.todos.length > 0) {
+                        this.todos = [];
+                    }
+                },
+                deleteSelection() {
+                    this.todos = this.todos.filter((todo) => !todo.checked);
+                },
             },
             computed: {
                 isAllChecked: {
@@ -76,8 +86,6 @@
         }
 
         #app {
-
-            
             width: 250px;
         }
     </style>
