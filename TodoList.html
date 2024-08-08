@@ -11,15 +11,6 @@
     <div id="app">
         <h2>할 일 추가하기</h2>
         <input type="text" v-model="message" ref="inputRef">
-<<<<<<< HEAD
-        <button @click="addTodo">추가하기</button><br>
-        <label for="chkAll">
-            <input id="chkAll" type="checkbox" @click="checkAll()">전제 선택</input>
-        </label>
-        <ol>
-            <li v-for="(todo, index) in todos" :key="index">
-                {{todo.text}}<button @click="deleteTodo(index)">삭제</button>
-=======
         <button @click="addTodo">추가하기</button><Br><br>
 
         <label for="chkAll">
@@ -32,7 +23,6 @@
                     <input :id="'chk' + index" type="checkbox" v-model="todo.checked">
                     {{todo.text}}
                 </label> <button @click="deleteTodo(index)">삭제</button>
->>>>>>> 41ac2fc3cdff9fe1704101800147144f907f97cb
             </li>
         </ol>
     </div>
@@ -57,13 +47,9 @@
                 deleteTodo(index) {
                     this.todos.splice(index, 1);
                 },
-<<<<<<< HEAD
-
-=======
                 toggleAll(event) {
                     this.isAllChecked = event.target.checked;
                 }
->>>>>>> 41ac2fc3cdff9fe1704101800147144f907f97cb
             },
             computed: {
                 isAllChecked: {
