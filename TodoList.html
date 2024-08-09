@@ -7,7 +7,12 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 <body>
+   
+    <!-- todo id가 새로고침 했을 때 setId()로 초기화 돼서 id 값이 중복되는 현상-->
+    <!-- todo 할 일 수정이 가능하게 하기-->
+    <!-- todo 필터 만들기-->
     
+
     <div id="app">
         <h2>할 일 추가하기</h2>
         <input type="text" v-model="message" ref="inputRef">
@@ -22,17 +27,22 @@
         <button @click="deleteSelection" :style="buttonStyle">선택 삭제</button>
 
         <ol>
+            <span :class="{emptyComment : emptyComment}">할 일이 없습니다.</span>
+
             <li v-for="(todo, id) in todos" :key="id">
                 <label :for="'chk' + id">
-                    <input :id="'chk' + id" type="checkbox" v-model="todo.checked" >
+                    <input :id="'chk' + id" type="checkbox" v-model="todo.checked" @click="toggleChecked(id)">
                     <span :class="{todoClassStyle : todo.checked}" 
                             :style="{color: textColor, fontWeight: fontWeight}">{{todo.text}}</span>
-                </label> <button @click="deleteTodo(id)" :style="buttonStyle">삭제</button>
+                </label> 
+                <button @click="deleteTodo(id)" :style="buttonStyle">삭제</button>
             </li>
         </ol>
     </div>
 
+    
     <script>
+
 
         // 인스턴스 생성
         new Vue({
@@ -53,9 +63,10 @@
             methods: {
                 addTodo() {
                     if (this.message.trim()) {
-                        this.todos.push({id: this.todos.length, text: this.message, checked: false });
+                        this.todos.push({ id: this.setId(), text: this.message, checked: false });
                         this.message = "";
                         this.$refs.inputRef.focus();
+                        localStorage.setItem("todosInLocalStorage", JSON.stringify(this.todos));
                     }
                 },
                 deleteTodo(id) {
@@ -72,6 +83,20 @@
                 deleteSelection() {
                     this.todos = this.todos.filter((todo) => !todo.checked);
                 },
+                
+                setId() {
+                    if(!this.idNum) {
+                        this.idNum = 0;
+                    }
+                    return ++this.idNum;
+                },
+                toggleChecked(id) {
+                    var todo = this.todos.find(todo => todo.id === id);
+                    if(todo) {
+                        todo.checked = !todo.checked;
+                    }
+                    localStorage.setItem("todosInLocalStorage", JSON.stringify(this.todos));
+                },
             },
             computed: {
                 isAllChecked: {
@@ -83,6 +108,24 @@
                             todo.checked = value;
                         });
                     }
+                },
+                emptyComment() {
+                    if(this.todos.length > 0) {
+                        return true;
+                    } else return false;
+                },
+            },
+            watch: {
+                todos: {
+                    handler(newTodos) {
+                        localStorage.setItem("todosInLocalStorage", JSON.stringify(newTodos));
+                    }
+                },
+            },
+            mounted() {
+                const storedTodos = JSON.parse(localStorage.getItem("todosInLocalStorage"));
+                if (storedTodos) {
+                    this.todos = storedTodos;
                 }
             }
         });
@@ -104,7 +147,11 @@
         .todoClassStyle {
             color: red !important;
             font-weight: bolder !important;
-        }        
+            text-decoration: line-through;
+        }
+        .emptyComment {
+            display: none;
+        }
     </style>
 
 </body>
