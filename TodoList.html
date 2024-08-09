@@ -25,8 +25,9 @@
             <li v-for="(todo, id) in todos" :key="id">
                 <label :for="'chk' + id">
                     <input :id="'chk' + id" type="checkbox" v-model="todo.checked" >
-                    <span :class="{todoClassStyle : todo.checked}" :style="{color: textColor, fontWeight: fontWeight}">{{todo.text}}</span>
-                </label> <button @click="deleteTodo(id)" :disabled="!todo.checked" :style="buttonStyle">삭제</button>
+                    <span :class="{todoClassStyle : todo.checked}" 
+                            :style="{color: textColor, fontWeight: fontWeight}">{{todo.text}}</span>
+                </label> <button @click="deleteTodo(id)" :style="buttonStyle">삭제</button>
             </li>
         </ol>
     </div>
@@ -98,6 +99,7 @@
 
         #app {
             width: 250px;
+            margin: 50px;
         }
         .todoClassStyle {
             color: red !important;
