@@ -40,10 +40,8 @@
             <span :class="{emptyComment : emptyComment}">할 일이 없습니다.</span>
 
             <li v-for="(todo, id) in filteredTodo" :key="id">
-                <label :for="'chk' + id">
-                    <input :id="'chk' +id" v-model="todo.checked" type="checkbox" @change="updateLocalStorage">
+                    <input v-model="todo.checked" type="checkbox" @change="updateLocalStorage">
                     <input v-model="todo.text" :class="{todoClassStyle : todo.checked}" :style="{color : textColor, fontWeight : fontWeight}"></input>
-                </label>
                 <button @click="updateLocalStorage" :style="buttonStyle">수정</button>
                 <button @click="deleteTodo(id)" :style="buttonStyle">삭제</button>
             </li>
