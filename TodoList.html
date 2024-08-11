@@ -7,46 +7,56 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 <body>
-   
-    <!-- todo id가 새로고침 했을 때 setId()로 초기화 돼서 id 값이 중복되는 현상-->
-    <!-- todo 할 일 수정이 가능하게 하기-->
-    <!-- todo 필터 만들기-->
+
+    <!-- todo css, hover-->
     
-
     <div id="app">
-        <h2>할 일 추가하기</h2>
-        <input type="text" v-model="message" ref="inputRef">
-        <button @click="addTodo" :style="buttonStyle" :disabled="!message ? true : false">추가하기</button><Br><br>
 
+        <h2>할 일 추가하기</h2>
+        <input type="text" v-model="message" ref="inputRef" placeholder="할 일 추가하기" @keyup.enter="addTodo">
+        <!-- 추가하기 버튼 -->
+        <button @click="addTodo" :style="buttonStyle" :disabled="!message? true : false">추가하기</button><br><br>
+
+        <!-- 전체 선택 checkbox -->
         <label for="chkAll">
-            <input id="chkAll" type="checkbox" :checked="isAllChecked" @change="toggleAll">
-            &nbsp;전체 선택<br><br>
+            <input id="chkAll" type="checkbox" :checked="isAllChecked" @change="toggleAll">&nbsp;전체 선택<br><br>
         </label>
 
+        <!-- 전부 삭제 버튼 -->
         <button @click="deleteAll" :style="buttonStyle">전부 삭제</button>
+
+        <!-- 선택 삭제 -->
         <button @click="deleteSelection" :style="buttonStyle">선택 삭제</button>
 
+        <!-- 필터링 버튼 -->
+        <select name="" id="selectBtn" v-model="selectedOption">
+           <option value="all" selected>전체</option>
+           <option value="done">완료</option>
+           <option value="undone">미완료</option>
+        </select>
+
+        <!-- 할 일 내용 칸 -->
         <ol>
             <span :class="{emptyComment : emptyComment}">할 일이 없습니다.</span>
 
-            <li v-for="(todo, id) in todos" :key="id">
+            <li v-for="(todo, id) in filteredTodo" :key="id">
                 <label :for="'chk' + id">
-                    <input :id="'chk' + id" type="checkbox" v-model="todo.checked" @click="toggleChecked(id)">
-                    <span :class="{todoClassStyle : todo.checked}" 
-                            :style="{color: textColor, fontWeight: fontWeight}">{{todo.text}}</span>
-                </label> 
+                    <input :id="'chk' +id" v-model="todo.checked" type="checkbox" @change="updateLocalStorage">
+                    <input v-model="todo.text" :class="{todoClassStyle : todo.checked}" :style="{color : textColor, fontWeight : fontWeight}"></input>
+                </label>
+                <button @click="updateLocalStorage" :style="buttonStyle">수정</button>
                 <button @click="deleteTodo(id)" :style="buttonStyle">삭제</button>
             </li>
         </ol>
+
     </div>
 
-    
     <script>
 
+        new Vue ({
 
-        // 인스턴스 생성
-        new Vue({
             el: '#app',
+
             data: {
                 todos: [],
                 message: '',
@@ -59,45 +69,56 @@
                     boxShadow: '0px 2px 4px',
                     fontWeight: 'bold'
                 },
+                idNum: 0,
+                checked: false,
+                selectedOption: 'all'
             },
+
             methods: {
                 addTodo() {
                     if (this.message.trim()) {
-                        this.todos.push({ id: this.setId(), text: this.message, checked: false });
+                        this.todos.push({id : this.setId(), text : this.message, checked : false});
                         this.message = "";
                         this.$refs.inputRef.focus();
-                        localStorage.setItem("todosInLocalStorage", JSON.stringify(this.todos));
+                        this.updateLocalStorage();
                     }
                 },
+
                 deleteTodo(id) {
                     this.todos.splice(id, 1);
+                    this.updateLocalStorage();
                 },
-                toggleAll(event) {
-                    this.isAllChecked = event.target.checked;
+
+                toggleAll(e) {
+                    this.isAllChecked = e.target.checked;
+                    this.updateLocalStorage();
                 },
+
                 deleteAll() {
                     if(this.todos.length > 0) {
                         this.todos = [];
                     }
+                    localStorage.removeItem("todosInLocalStorage");
                 },
+
                 deleteSelection() {
                     this.todos = this.todos.filter((todo) => !todo.checked);
+                    this.updateLocalStorage();
                 },
-                
+
                 setId() {
-                    if(!this.idNum) {
-                        this.idNum = 0;
+                    if(this.todos.length > 0) {
+                        this.idNum = Math.max(...this.todos.map(todo => todo.id));
                     }
                     return ++this.idNum;
                 },
-                toggleChecked(id) {
-                    var todo = this.todos.find(todo => todo.id === id);
-                    if(todo) {
-                        todo.checked = !todo.checked;
-                    }
+
+                updateLocalStorage() {
                     localStorage.setItem("todosInLocalStorage", JSON.stringify(this.todos));
                 },
+
             },
+
             computed: {
                 isAllChecked: {
                     get() {
@@ -106,31 +127,36 @@
                     set(value) {
                         this.todos.forEach(todo => {
                             todo.checked = value;
-                        });
+                        })
                     }
                 },
+
                 emptyComment() {
                     if(this.todos.length > 0) {
                         return true;
                     } else return false;
                 },
-            },
-            watch: {
-                todos: {
-                    handler(newTodos) {
-                        localStorage.setItem("todosInLocalStorage", JSON.stringify(newTodos));
+
+                filteredTodo() {
+                    if(this.selectedOption === 'all') {
+                        return this.todos;
+                    } else if (this.selectedOption === 'done') {
+                        return this.todos.filter(todo => todo.checked);
+                    } else if (this.selectedOption === 'undone') {
+                        return this.todos.filter(todo => !todo.checked);
                     }
-                },
+                }
             },
+
             mounted() {
                 const storedTodos = JSON.parse(localStorage.getItem("todosInLocalStorage"));
                 if (storedTodos) {
                     this.todos = storedTodos;
+                    this.idNum = Math.max(...this.todos.map(todo => todo.id));
                 }
-            }
-        });
-
-
+            },
+            
+        })
 
     </script>
 
