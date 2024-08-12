@@ -94,7 +94,7 @@
                 idNum: 0,
                 checked: false,
                 selectedOption: 'all',
-            },
+            },// data()-end
 
             methods: {
                 addTodo() {
@@ -104,7 +104,7 @@
                         this.$refs.inputRef.focus();
                         this.updateLocalStorage();
                     }
-                },
+                },// addTodo()-end
 
                 deleteTodo(id) { // 하나의 todo를 삭제
                     this.todos.splice(id, 1);
@@ -117,7 +117,7 @@
                     if (this.todos.every(todo => !todo.checked)) { // 미완료 항목에서 todo가 없으면 전체보기로 전환
                         this.selectedOption = 'all';
                     }
-                },
+                },// deleteSelection()-end
 
                 deleteAll() { // 모든 todo를 삭제
                     if (this.todos.length > 0) {
@@ -125,25 +125,25 @@
                     }
                     this.updateLocalStorage();
                     this.selectedOption = 'all';
-                },
+                },// deleteAll()-end
 
                 toggleAll(e) { // 전체 선택 checkbox의 값으로 computed 속성의 isAllChecked set() 실행
                     this.isAllChecked = e.target.checked;
                     this.updateLocalStorage();
-                },
+                },// toggleAll()-end
 
                 setId() { // 존재하는 todo의 id 값 중 가장 큰 것을 선택하여 +1 한 값을 반환
                     if(this.todos.length > 0) {
                         this.idNum = Math.max(...this.todos.map(todo => todo.id));
                     }
                     return ++this.idNum;
-                },
+                },// setId()-end
 
                 updateLocalStorage() { // localStorage를 최신화한다.
                     localStorage.setItem("todosInLocalStorage", JSON.stringify(this.todos));
-                },
+                },// updateLocalStorage()-end
 
-            },
+            },// methods()-end
 
             computed: {
                 isAllChecked: {
@@ -155,13 +155,13 @@
                             todo.checked = value;
                         });
                     }
-                },
+                },// isAllChecked()-end
 
                 emptyComment() { // 하나 이상의 todo가 존재하면 true값이 반환되며 comptyComment 클래스가 적용된다.
                     if (this.todos.length > 0) {
                         return true;
                     } else return false;
-                },
+                },// emptyComment()-end
 
                 filteredTodo() { // todos를 filter()를 사용하여 원하는 데이터 출력
                     if (this.selectedOption === 'all') {
@@ -170,10 +170,10 @@
                         return this.todos.filter(todo => todo.checked);
                     } else if (this.selectedOption === 'undone') {
                         return this.todos.filter(todo => !todo.checked);
-                    }
-                },
+                    }// if()-end
+                },// filteredTodo()-end
 
-            },
+            },// computed()-end
 
             mounted() { // 로컬 스토리지에 있는 데이터 할당
                 const storedTodos = JSON.parse(localStorage.getItem("todosInLocalStorage"));
@@ -181,8 +181,8 @@
                     this.todos = storedTodos;
                     this.idNum = Math.max(...this.todos.map(todo => todo.id));
                     this.$refs.inputRef.focus(); // 'ref'속성으로 등록된 DOM 요소나 자식 컴포넌트에 대한 참조
-                }
-            }
+                }// if()-end
+            }// mounted()-end
 
         })
 
