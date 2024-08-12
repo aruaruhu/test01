@@ -15,10 +15,21 @@
         <h2>할 일 추가하기</h2>
     
         <!-- 할 일 기입 input  -->
-        <input type="text" v-model="message" ref="inputRef" placeholder="할 일을 기입해주세요." @keyup.enter="addTodo" id="addInput">
+        <input
+            type="text" 
+            v-model="message" 
+            ref="inputRef" 
+            placeholder="할 일을 기입해주세요." 
+            @keyup.enter="addTodo" 
+            id="addInput"
+        >
     
         <!-- 추가하기 버튼 -->
-        <button class="buttonStyle" @click="addTodo" :disabled="!message? true : false">
+        <button
+            class="buttonStyle" 
+            @click="addTodo" 
+            :disabled="!message? true : false"
+        >
             추가하기
         </button>
     
@@ -26,21 +37,16 @@
     
         <!-- 전체 선택 checkbox -->
         <label for="chkAll">
-            <input type="checkbox" id="chkAll" :checked="isAllChecked" @change="toggleAll">
-            &nbsp;전체 선택
+            <input type="checkbox" id="chkAll" :checked="isAllChecked" @change="toggleAll">&nbsp;전체 선택
         </label>
     
         <br><br>
     
         <!-- 전부 삭제 버튼 -->
-        <button class="buttonStyle" @click="deleteAll">
-            전부 삭제
-        </button>
+        <button class="buttonStyle" @click="deleteAll">전부 삭제</button>
     
         <!-- 선택 삭제 -->
-        <button class="buttonStyle" @click="deleteSelection">
-            선택 삭제
-        </button>
+        <button class="buttonStyle" @click="deleteSelection">선택 삭제</button>
     
         <!-- 필터링 버튼 -->
         <select id="selectBtn" v-model="selectedOption">
@@ -54,15 +60,19 @@
             <span :class="{emptyComment : emptyComment}">할 일이 없습니다.</span>
     
             <li v-for="(todo, id) in filteredTodo" :key="todo.id">
-                <input type="checkbox" v-model="todo.checked" @change="updateLocalStorage">
-                <input type="text" v-model="todo.text" :class="{todoClassStyle : todo.checked}"
-                    :style="{color:textColor,fontWeight:fontWeight,borderRadius:borderRadius,border:border}">
-                <button class="buttonStyle" @click="updateLocalStorage">
-                    수정
-                </button>
-                <button class="buttonStyle" @click="deleteTodo(id)">
-                    삭제
-                </button>
+                <input 
+                    type="checkbox" 
+                    v-model="todo.checked" 
+                    @change="updateLocalStorage"
+                >
+                <input 
+                    type="text" 
+                    v-model="todo.text" 
+                    :class="{todoClassStyle : todo.checked}"
+                    :style="{color:textColor,fontWeight:fontWeight,borderRadius:borderRadius,border:border}"
+                >
+                <button class="buttonStyle" @click="updateLocalStorage">수정</button>
+                <button class="buttonStyle" @click="deleteTodo(id)">삭제</button>
             </li>
         </ol>
     
@@ -129,7 +139,7 @@
                     return ++this.idNum;
                 },
 
-                updateLocalStorage() { // localStorage를 update한다.
+                updateLocalStorage() { // localStorage를 최신화한다.
                     localStorage.setItem("todosInLocalStorage", JSON.stringify(this.todos));
                 },
 
@@ -170,6 +180,7 @@
                 if (storedTodos) {
                     this.todos = storedTodos;
                     this.idNum = Math.max(...this.todos.map(todo => todo.id));
+                    this.$refs.inputRef.focus(); // 'ref'속성으로 등록된 DOM 요소나 자식 컴포넌트에 대한 참조
                 }
             }
 
