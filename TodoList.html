@@ -11,49 +11,48 @@
 <body>
 
     <div id="app">
-
+    
         <h2>할 일 추가하기</h2>
-
+    
         <!-- 할 일 기입 input  -->
-        <input type="text" v-model="message" ref="inputRef" placeholder="할 일을 기입해주세요." @keyup.enter="addTodo"
-            id="addInput">
-
+        <input type="text" v-model="message" ref="inputRef" placeholder="할 일을 기입해주세요." @keyup.enter="addTodo" id="addInput">
+    
         <!-- 추가하기 버튼 -->
         <button class="buttonStyle" @click="addTodo" :disabled="!message? true : false">
             추가하기
         </button>
-
+    
         <br><br>
-
+    
         <!-- 전체 선택 checkbox -->
         <label for="chkAll">
             <input type="checkbox" id="chkAll" :checked="isAllChecked" @change="toggleAll">
             &nbsp;전체 선택
         </label>
-
+    
         <br><br>
-
+    
         <!-- 전부 삭제 버튼 -->
         <button class="buttonStyle" @click="deleteAll">
             전부 삭제
         </button>
-
+    
         <!-- 선택 삭제 -->
         <button class="buttonStyle" @click="deleteSelection">
             선택 삭제
         </button>
-
+    
         <!-- 필터링 버튼 -->
         <select id="selectBtn" v-model="selectedOption">
             <option value="all">전체</option>
             <option value="done">완료</option>
             <option value="undone">미완료</option>
         </select>
-
+    
         <!-- 할 일 내용 칸 -->
         <ol>
             <span :class="{emptyComment : emptyComment}">할 일이 없습니다.</span>
-
+    
             <li v-for="(todo, id) in filteredTodo" :key="todo.id">
                 <input type="checkbox" v-model="todo.checked" @change="updateLocalStorage">
                 <input type="text" v-model="todo.text" :class="{todoClassStyle : todo.checked}"
@@ -66,7 +65,7 @@
                 </button>
             </li>
         </ol>
-
+    
     </div>
 
     <script>
@@ -89,7 +88,7 @@
 
             methods: {
                 addTodo() {
-                    if (this.todos.trim()) {
+                    if (this.message.trim()) {
                         this.todos.push({ id: this.setId(), text: this.message, checked: false });
                         this.message = "";
                         this.$refs.inputRef.focus();
@@ -124,9 +123,9 @@
                 },
 
                 setId() { // 존재하는 todo의 id 값 중 가장 큰 것을 선택하여 +1 한 값을 반환
-                    // if(this.todos.length > 0) {
-                    //     this.idNum = Math.max(...this.todos.map(todo => todo.id));
-                    // }
+                    if(this.todos.length > 0) {
+                        this.idNum = Math.max(...this.todos.map(todo => todo.id));
+                    }
                     return ++this.idNum;
                 },
 
