@@ -49,7 +49,7 @@
         <button class="buttonStyle" @click="deleteSelection">선택 삭제</button>
     
         <!-- 필터링 버튼 -->
-        <select id="selectBtn" v-model="selectedOption">
+        <select id="selectBtn" v-model="selectedOption" :selected="autoSelection">
             <option value="all">전체</option>
             <option value="done">완료</option>
             <option value="undone">미완료</option>
@@ -57,13 +57,14 @@
     
         <!-- 할 일 내용 칸 -->
         <ol>
-            <span :class="{emptyComment : emptyComment}">할 일이 없습니다.</span>
+            <span v-if="!todos.length">할 일이 없습니다.</span>
     
             <li v-for="(todo, id) in filteredTodo" :key="todo.id">
                 <input 
                     type="checkbox" 
-                    v-model="todo.checked" 
+                    v-model="todo.checked"
                     @change="updateLocalStorage"
+                    @click="updateTodo(todo.id)"
                 >
                 <input 
                     type="text" 
@@ -71,8 +72,8 @@
                     :class="{todoClassStyle : todo.checked}"
                     :style="{color:textColor,fontWeight:fontWeight,borderRadius:borderRadius,border:border}"
                 >
-                <button class="buttonStyle" @click="updateLocalStorage">수정</button>
-                <button class="buttonStyle" @click="deleteTodo(id)">삭제</button>
+                <button class="buttonStyle" @click="updateTodo(todo.id)">수정</button>
+                <button class="buttonStyle" @click="deleteTodo(todo.id)">삭제</button>
             </li>
         </ol>
     
@@ -92,31 +93,52 @@
                 borderRadius: '5px',
                 border: '1px solid gray',
                 idNum: 0,
-                checked: false,
                 selectedOption: 'all',
             },// data()-end
 
             methods: {
+                
+                isBlankException() {
+                    const isBlankTodo = this.todos.some(todo => todo.text === ''); // 항목 중 공백으로 된 text를 확인, boolean 값 반환
+                    const todoIndex = this.todos.findIndex(todo => todo.text === ''); // 항목 중 공백으로 된 text를 찾아서 index를 반환
+                    if (isBlankTodo) {
+                        alert((todoIndex + 1) + "번째 항목을 공백으로 남긴채 진행할 수 없습니다.\n할 일을 기입하거나 삭제를 해주세요.");
+                        window.event.preventDefault();
+                        return true;
+                    }
+                    return false;
+                },// isBlankException()-end
+
                 addTodo() {
-                    if (this.message.trim()) {
-                        this.todos.push({ id: this.setId(), text: this.message, checked: false });
+                    if(this.isBlankException()) {
+                        return false;
+                    } else if(this.message.trim()){
+                        this.todos.push({ id: this.setId(), text: this.message });
                         this.message = "";
-                        this.$refs.inputRef.focus();
+                        this.$refs.inputRef.focus(); // ※ $ref속성으로 DOM을 직접적으로 제어하는건 지양해야함.
                         this.updateLocalStorage();
                     }
                 },// addTodo()-end
 
-                deleteTodo(id) { // 하나의 todo를 삭제
-                    this.todos.splice(id, 1);
+
+                updateTodo(todoId) {
+                    if(this.isBlankException()) {
+                        return true;
+                    } else {
+                        this.updateLocalStorage();
+                    }
+                },// updateTodo()-end
+
+                deleteTodo(todoId) { // 하나의 todo를 삭제
+                    this.todos = this.todos.filter(todo => todo.id !== todoId);
+
                     this.updateLocalStorage();
                 },
 
                 deleteSelection() { // 선택된 복수의 todo를 삭제
                     this.todos = this.todos.filter(todo => !todo.checked);
+                    this.selectedOption = this.todos.length ? this.selectedOption = 'all' : this.selectedOption = 'done';
                     this.updateLocalStorage();
-                    if (this.todos.every(todo => !todo.checked)) { // 미완료 항목에서 todo가 없으면 전체보기로 전환
-                        this.selectedOption = 'all';
-                    }
                 },// deleteSelection()-end
 
                 deleteAll() { // 모든 todo를 삭제
@@ -134,7 +156,7 @@
 
                 setId() { // 존재하는 todo의 id 값 중 가장 큰 것을 선택하여 +1 한 값을 반환
                     if(this.todos.length > 0) {
-                        this.idNum = Math.max(...this.todos.map(todo => todo.id));
+                        this.idNum = Math.max(this.idNum, ...this.todos.map(todo => todo.id));
                     }
                     return ++this.idNum;
                 },// setId()-end
@@ -157,34 +179,50 @@
                     }
                 },// isAllChecked()-end
 
-                emptyComment() { // 하나 이상의 todo가 존재하면 true값이 반환되며 comptyComment 클래스가 적용된다.
-                    if (this.todos.length > 0) {
-                        return true;
-                    } else return false;
-                },// emptyComment()-end
-
                 filteredTodo() { // todos를 filter()를 사용하여 원하는 데이터 출력
-                    if (this.selectedOption === 'all') {
-                        return this.todos;
-                    } else if (this.selectedOption === 'done') {
-                        return this.todos.filter(todo => todo.checked);
-                    } else if (this.selectedOption === 'undone') {
-                        return this.todos.filter(todo => !todo.checked);
-                    }// if()-end
+                    switch(this.selectedOption) {
+                        case 'all':
+                            return this.todos;
+                            break;
+                        case 'done':
+                            return this.todos.filter(todo => todo.checked);
+                            break;
+                        case 'undone':
+                            return this.todos.filter(todo => !todo.checked);
+                            break;
+                        default: this.todos;
+                    }//switch~case()-end
                 },// filteredTodo()-end
+
+                autoSelection() { // select로 필터링 된 완료 또는 미완료 todos들이 전부 삭제 됐을 때, select의 값을 'all'로 바꿈
+                    const doneTodos = this.todos.filter(todo => todo.checked);
+                    const unDoneTodos = this.todos.filter(todo => !todo.checked);
+
+                    if(this.selectedOption === 'done' && !doneTodos.length) {
+                        return this.selectedOption = 'all';
+                    } else if(this.selectedOption === 'undone' && !unDoneTodos.length) {
+                        return this.selectedOption= 'all';
+                    }
+                }// autoSelection()-end
 
             },// computed()-end
 
-            mounted() { // 로컬 스토리지에 있는 데이터 할당
+            created() { // created()에서 데이터를 불러와야한다. & 로컬 스토리지에 있는 데이터 할당
                 const storedTodos = JSON.parse(localStorage.getItem("todosInLocalStorage"));
                 if (storedTodos) {
                     this.todos = storedTodos;
-                    this.idNum = Math.max(...this.todos.map(todo => todo.id));
-                    this.$refs.inputRef.focus(); // 'ref'속성으로 등록된 DOM 요소나 자식 컴포넌트에 대한 참조
+                    this.idNum = Math.max(this.idNum, ...this.todos.map(todo => todo.id));
                 }// if()-end
+            },// created()-end
+
+            mounted() {
+                // 'ref'속성으로 등록된 DOM 요소나 자식 컴포넌트에 대한 참조
+                // ※ $refs와 같이 "DOM을 직접 제어하는 것은 지양"해야한다.
+                this.$refs.inputRef.focus(); 
             }// mounted()-end
 
-        })
+
+        });
 
     </script>
 
