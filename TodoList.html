@@ -30,7 +30,7 @@
             @click="addTodo" 
             :disabled="!message? true : false"
         >
-            추가하기
+        추가하기
         </button>
     
         <br><br>
@@ -39,6 +39,14 @@
         <label for="chkAll">
             <input type="checkbox" id="chkAll" :checked="isAllChecked" @change="toggleAll">&nbsp;전체 선택
         </label>
+
+        <button
+            class="buttonStyle"
+            style="margin-left: 30px;"
+            @click="deleteAllCompleted"
+        >
+        완료 삭제
+        </button>
     
         <br><br>
     
@@ -50,9 +58,15 @@
     
         <!-- 필터링 버튼 -->
         <select id="selectBtn" v-model="selectedOption" :selected="autoSelection">
-            <option value="all">전체</option>
-            <option value="done">완료</option>
-            <option value="undone">미완료</option>
+            <option value="all" selected>전체</option>
+            <option value="done">체크</option>
+            <option value="undone">미체크</option>
+        </select>
+
+        <select id="selectBtn" v-model="completedOption">
+            <option value="allCompleted" selected>완료보기</option>
+            <option value="completed">완료</option>
+            <option value="uncompleted">미완료</option>
         </select>
     
         <!-- 할 일 내용 칸 -->
@@ -73,7 +87,8 @@
                     :style="{color:textColor,fontWeight:fontWeight,borderRadius:borderRadius,border:border}"
                 >
                 <button class="buttonStyle" @click="updateTodo(todo.id)">수정</button>
-                <button class="buttonStyle" @click="deleteTodo(todo.id)">삭제</button>
+                <button class="buttonStyle" @click="completeTodo(todo.id)">완료</button>
+                <button class="buttonStyle" @click="deleteTodo(todo.id)" style="margin-left: 30px;">삭제</button>
             </li>
         </ol>
     
@@ -94,6 +109,8 @@
                 border: '1px solid gray',
                 idNum: 0,
                 selectedOption: 'all',
+                completed: 'uncompleted',
+                completedOption: 'allCompleted'
             },// data()-end
 
             methods: {
@@ -113,13 +130,30 @@
                     if(this.isBlankException()) {
                         return false;
                     } else if(this.message.trim()){
-                        this.todos.push({ id: this.setId(), text: this.message });
+                        this.todos.push({ id: this.setId(), text: this.message, completed : this.completed });
                         this.message = "";
                         this.$refs.inputRef.focus(); // ※ $ref속성으로 DOM을 직접적으로 제어하는건 지양해야함.
                         this.updateLocalStorage();
                     }
                 },// addTodo()-end
 
+                completeTodo(todoId) {
+                    const todo = this.todos.find(todo => todo.id === todoId);
+
+                    console.log(todo.id);
+                    if(this.isBlankException()) {
+                        return false;
+                    } else {
+                        todo.completed = todo.completed === 'uncompleted' ? 'completed' : 'uncompleted';
+                        this.updateLocalStorage();
+                    }
+                    
+                },// completedTodo()-end
+
+                deleteAllCompleted() {
+                    this.todos = this.todos.filter(todo => todo.completed !== 'completed');
+                    this.updateLocalStorage();
+                }, // deleteAllCompleted()-end
 
                 updateTodo(todoId) {
                     if(this.isBlankException()) {
@@ -131,7 +165,6 @@
 
                 deleteTodo(todoId) { // 하나의 todo를 삭제
                     this.todos = this.todos.filter(todo => todo.id !== todoId);
-
                     this.updateLocalStorage();
                 },
 
@@ -193,6 +226,10 @@
                         default: this.todos;
                     }//switch~case()-end
                 },// filteredTodo()-end
+
+                completedTodo() {
+
+                },
 
                 autoSelection() { // select로 필터링 된 완료 또는 미완료 todos들이 전부 삭제 됐을 때, select의 값을 'all'로 바꿈
                     const doneTodos = this.todos.filter(todo => todo.checked);
