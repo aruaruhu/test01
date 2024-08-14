@@ -40,6 +40,7 @@
             <input type="checkbox" id="chkAll" :checked="isAllChecked" @change="toggleAll">&nbsp;전체 선택
         </label>
 
+        <!-- 완료 항목 전부 삭제 버튼 -->
         <button
             class="buttonStyle"
             style="margin-left: 30px;"
@@ -56,13 +57,14 @@
         <!-- 선택 삭제 -->
         <button class="buttonStyle" @click="deleteSelection">선택 삭제</button>
     
-        <!-- 필터링 버튼 -->
+        <!-- 체크항목 필터링 버튼 -->
         <select id="selectBtn" v-model="selectedOption" :selected="autoSelectionForChecked">
             <option value="all" selected>체크 상태</option>
             <option value="done">체크</option>
             <option value="undone">미체크</option>
         </select>
 
+        <!-- 완료항목 필터링 버튼 -->
         <select id="selectBtn" v-model="completedOption" :selected="autoSelectionForCompletion">
             <option value="allCompleted">완료 상태</option>
             <option value="completed">완료</option>
@@ -89,7 +91,6 @@
                 <button class="buttonStyle" @click="updateTodo(todo.id)">수정</button>
                 <button class="buttonStyle" @click="completeTodo(todo.id)" 
                         :class="{completedButtonStyle : todo.completedButtonStyle}">완료</button>
-                <!-- ! 기능 삭제  <button class="buttonStyle" @click="deleteTodo(todo.id)" style="margin-left: 30px;">삭제</button> -->
             </li>
         </ol>
     
@@ -113,6 +114,13 @@
             },// data()-end
 
             methods: {
+
+                setId() { // 존재하는 todo의 id 값 중 가장 큰 것을 선택하여 +1 한 값을 반환
+                    if (this.todos.length > 0) {
+                        this.idNum = Math.max(this.idNum, ...this.todos.map(todo => todo.id));
+                    }
+                    return ++this.idNum;
+                },// setId()-end
                 
                 isEmptyException() {
                     // 항목 중 공백으로 된 text를 확인, boolean 값으로 반환
@@ -141,9 +149,10 @@
 
                 completeTodo(todoId) { // 완료 버튼 기능 로직
                     const todo = this.todos.find(todo => todo.id === todoId);
-                    if(this.isEmptyException()) {
+                    if(this.isEmptyException()) { // 공백 유효성 검사
                         return false;
                     } else {
+                        // 요소의 설정을 바꿈으로써, text부분과 button의 style을 바꿔 직관적으로 완료의 유무를 표시
                         todo.completed = todo.completed === 'uncompleted' ? 'completed' : 'uncompleted';
                         todo.completedTodoStyle = todo.completedTodoStyle === true ? false : true;
                         todo.completedButtonStyle = todo.completedButtonStyle === true ? false : true;
@@ -151,26 +160,18 @@
                     }
                 },// completedTodo()-end
 
-                deleteAllCompleted() {
+                deleteAllCompleted() { // 모든 완료 항목 삭제 로직
                     this.todos = this.todos.filter(todo => todo.completed !== 'completed');
                     this.updateLocalStorage();
                 }, // deleteAllCompleted()-end
 
-                updateTodo(todoId) {
+                updateTodo(todoId) { // 텍스트 수정 함수
                     if(this.isEmptyException()) {
                         return true;
                     } else {
                         this.updateLocalStorage();
                     }
                 },// updateTodo()-end
-
-                <!-- ! 기능 삭제 -->
-                /*
-                deleteTodo(todoId) { // 하나의 todo를 삭제
-                    this.todos = this.todos.filter(todo => todo.id !== todoId);
-                    this.updateLocalStorage();
-                },
-                */
 
                 deleteSelection() { // 선택된 복수의 todo를 삭제
                     this.todos = this.todos.filter(todo => !todo.checked);
@@ -189,13 +190,6 @@
                     this.isAllChecked = e.target.checked;
                     this.updateLocalStorage();
                 },// toggleAll()-end
-
-                setId() { // 존재하는 todo의 id 값 중 가장 큰 것을 선택하여 +1 한 값을 반환
-                    if(this.todos.length > 0) {
-                        this.idNum = Math.max(this.idNum, ...this.todos.map(todo => todo.id));
-                    }
-                    return ++this.idNum;
-                },// setId()-end
 
                 updateLocalStorage() { // localStorage를 최신화한다.
                     localStorage.setItem("todosInLocalStorage", JSON.stringify(this.todos));
@@ -235,13 +229,13 @@
                             filteredItems = filteredItems.filter(todo => todo.completed === 'uncompleted');
                             break;
                     }//switch~case()-end
+
                     return filteredItems;
                 },// filteredTodo()-end
 
-                autoSelectionForChecked() { // select로 필터링 된 완료 또는 미완료 todos들이 전부 삭제 됐을 때, select의 값을 'all'로 바꿈
+                autoSelectionForChecked() { // select로 필터링 된 체크 또는 미체크 todos들이 전부 삭제 됐을 때, select의 값을 'all'로 바꿈
                     const doneTodos = this.todos.filter(todo => todo.checked);
                     const unDoneTodos = this.todos.filter(todo => !todo.checked);
-
                     if(this.selectedOption === 'done' && !doneTodos.length) {
                         return this.selectedOption = 'all';
                     } else if(this.selectedOption === 'undone' && !unDoneTodos.length) {
@@ -249,10 +243,9 @@
                     }
                 }, // autoSelection()-end
 
-                autoSelectionForCompletion() {
+                autoSelectionForCompletion() { // select로 필터링 된 완료 또는 미완료 todos들이 전부 삭제 됐을 때, select의 값을 'allCompleted'로 바꿈
                     const completedTodos = this.todos.filter(todo => todo.completed === 'completed');
                     const uncompletedTodos = this.todos.filter(todo => todo.completed === 'uncompleted');
-
                     if(this.completedOption === 'completed' && !completedTodos.length) {
                         return this.completedOption = 'allCompleted'
                     } else if(this.completedOption === 'uncompleted' && !uncompletedTodos.length) {
@@ -262,12 +255,12 @@
 
             },// computed()-end
 
-            created() { // created()에서 데이터를 불러와야한다. & 로컬 스토리지에 있는 데이터 할당
+            created() { // created()에서 데이터를 불러와야한다. => 로컬 스토리지에 있는 데이터 할당
                 const storedTodos = JSON.parse(localStorage.getItem("todosInLocalStorage"));
                 if (storedTodos) {
                     this.todos = storedTodos;
                     this.idNum = Math.max(this.idNum, ...this.todos.map(todo => todo.id));
-                }// if()-end
+                }
             },// created()-end
 
             mounted() {
@@ -275,7 +268,6 @@
                 // ※ $refs와 같이 "DOM을 직접 제어하는 것은 지양"해야한다.
                 this.$refs.inputRef.focus(); 
             }// mounted()-end
-
 
         });
 
