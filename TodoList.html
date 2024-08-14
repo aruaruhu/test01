@@ -87,7 +87,8 @@
                     :class="{completedTodoStyle : todo.completedTodoStyle}"
                 >
                 <button class="buttonStyle" @click="updateTodo(todo.id)">수정</button>
-                <button class="buttonStyle" @click="completeTodo(todo.id)">완료</button>
+                <button class="buttonStyle" @click="completeTodo(todo.id)" 
+                        :class="{completedButtonStyle : todo.completedButtonStyle}">완료</button>
                 <!-- ! 기능 삭제  <button class="buttonStyle" @click="deleteTodo(todo.id)" style="margin-left: 30px;">삭제</button> -->
             </li>
         </ol>
@@ -131,7 +132,7 @@
                         return false;
                     } else if(this.message.trim()){ // 할 일 추가하는 로직
                         this.todos.push({ id: this.setId(), text: this.message, completed : 'uncompleted', 
-                        checked : false, completedTodoStyle : false});
+                        checked : false, completedTodoStyle : false, completedButtonStyle : false});
                         this.message = "";
                         this.$refs.inputRef.focus(); // ※ $ref속성으로 DOM을 직접적으로 제어하는건 지양해야함. 
                         this.updateLocalStorage();
@@ -145,6 +146,7 @@
                     } else {
                         todo.completed = todo.completed === 'uncompleted' ? 'completed' : 'uncompleted';
                         todo.completedTodoStyle = todo.completedTodoStyle === true ? false : true;
+                        todo.completedButtonStyle = todo.completedButtonStyle === true ? false : true;
                         this.updateLocalStorage();
                     }
                 },// completedTodo()-end
@@ -204,7 +206,6 @@
             computed: {
                 isAllChecked: {
                     get() { // 하나 이상의 모든 todo가 checked되면 전체 선택 checkbox의 값도 true로 설정
-                        console.log('isAllChekced')
                         return this.todos.length > 0 && this.todos.every(todo => todo.checked);
                     },
                     set(value) { // 전체 선택 checkbox의 값을 모든 todo의 checked 속성에 할당
@@ -330,6 +331,10 @@
             font-weight: bolder !important;
             text-decoration: line-through;
             opacity: 0.3;
+        }
+
+        .completedButtonStyle {
+            background-color: lightcoral;
         }
 
         ol {
