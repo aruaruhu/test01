@@ -45,7 +45,7 @@
             style="margin-left: 30px;"
             @click="deleteAllCompleted"
         >
-        완료 삭제
+        완료 전부 삭제
         </button>
     
         <br><br>
@@ -57,14 +57,14 @@
         <button class="buttonStyle" @click="deleteSelection">선택 삭제</button>
     
         <!-- 필터링 버튼 -->
-        <select id="selectBtn" v-model="selectedOption" :selected="autoSelection">
-            <option value="all" selected>전체</option>
+        <select id="selectBtn" v-model="selectedOption" :selected="autoSelectionForChecked">
+            <option value="all" selected>체크 상태</option>
             <option value="done">체크</option>
             <option value="undone">미체크</option>
         </select>
 
-        <select id="selectBtn" v-model="completedOption">
-            <option value="allCompleted" selected>완료보기</option>
+        <select id="selectBtn" v-model="completedOption" :selected="autoSelectionForCompletion">
+            <option value="allCompleted">완료 상태</option>
             <option value="completed">완료</option>
             <option value="uncompleted">미완료</option>
         </select>
@@ -83,12 +83,12 @@
                 <input 
                     type="text" 
                     v-model="todo.text" 
-                    :class="{todoClassStyle : todo.checked}"
-                    :style="{color:textColor,fontWeight:fontWeight,borderRadius:borderRadius,border:border}"
+                    :style="{fontWeight:fontWeight,borderRadius:borderRadius,border:border}"
+                    :class="{completedTodoStyle : todo.completedTodoStyle}"
                 >
                 <button class="buttonStyle" @click="updateTodo(todo.id)">수정</button>
                 <button class="buttonStyle" @click="completeTodo(todo.id)">완료</button>
-                <button class="buttonStyle" @click="deleteTodo(todo.id)" style="margin-left: 30px;">삭제</button>
+                <!-- ! 기능 삭제  <button class="buttonStyle" @click="deleteTodo(todo.id)" style="margin-left: 30px;">삭제</button> -->
             </li>
         </ol>
     
@@ -103,51 +103,50 @@
             data: {
                 todos: [],
                 message: '',
-                textColor: 'blue',
                 fontWeight: 'bold',
                 borderRadius: '5px',
                 border: '1px solid gray',
                 idNum: 0,
                 selectedOption: 'all',
-                completed: 'uncompleted',
-                completedOption: 'allCompleted'
+                completedOption: 'allCompleted',
             },// data()-end
 
             methods: {
                 
-                isBlankException() {
-                    const isBlankTodo = this.todos.some(todo => todo.text === ''); // 항목 중 공백으로 된 text를 확인, boolean 값 반환
-                    const todoIndex = this.todos.findIndex(todo => todo.text === ''); // 항목 중 공백으로 된 text를 찾아서 index를 반환
-                    if (isBlankTodo) {
-                        alert((todoIndex + 1) + "번째 항목을 공백으로 남긴채 진행할 수 없습니다.\n할 일을 기입하거나 삭제를 해주세요.");
+                isEmptyException() {
+                    // 항목 중 공백으로 된 text를 확인, boolean 값으로 반환
+                    const isEmptyTodo = this.todos.some(todo => todo.text === ''); 
+                    // 항목 중 공백으로 된 text를 찾아서 index 값을 반환
+                    const todoIndex = this.todos.findIndex(todo => todo.text === ''); 
+                    if (isEmptyTodo) {
+                        alert((todoIndex + 1) + "번째 항목을 공백으로 남긴채 진행할 수 없습니다.\n할 일을 기입하거나 삭제 해주세요.");
                         window.event.preventDefault();
                         return true;
                     }
                     return false;
-                },// isBlankException()-end
+                },// isEmptyException()-end
 
-                addTodo() {
-                    if(this.isBlankException()) {
+                addTodo() { // 할 일 추가하기
+                    if(this.isEmptyException()) { // 공백 유효성 검사
                         return false;
-                    } else if(this.message.trim()){
-                        this.todos.push({ id: this.setId(), text: this.message, completed : this.completed });
+                    } else if(this.message.trim()){ // 할 일 추가하는 로직
+                        this.todos.push({ id: this.setId(), text: this.message, completed : 'uncompleted', 
+                        checked : false, completedTodoStyle : false});
                         this.message = "";
-                        this.$refs.inputRef.focus(); // ※ $ref속성으로 DOM을 직접적으로 제어하는건 지양해야함.
+                        this.$refs.inputRef.focus(); // ※ $ref속성으로 DOM을 직접적으로 제어하는건 지양해야함. 
                         this.updateLocalStorage();
                     }
                 },// addTodo()-end
 
-                completeTodo(todoId) {
+                completeTodo(todoId) { // 완료 버튼 기능 로직
                     const todo = this.todos.find(todo => todo.id === todoId);
-
-                    console.log(todo.id);
-                    if(this.isBlankException()) {
+                    if(this.isEmptyException()) {
                         return false;
                     } else {
                         todo.completed = todo.completed === 'uncompleted' ? 'completed' : 'uncompleted';
+                        todo.completedTodoStyle = todo.completedTodoStyle === true ? false : true;
                         this.updateLocalStorage();
                     }
-                    
                 },// completedTodo()-end
 
                 deleteAllCompleted() {
@@ -156,21 +155,23 @@
                 }, // deleteAllCompleted()-end
 
                 updateTodo(todoId) {
-                    if(this.isBlankException()) {
+                    if(this.isEmptyException()) {
                         return true;
                     } else {
                         this.updateLocalStorage();
                     }
                 },// updateTodo()-end
 
+                <!-- ! 기능 삭제 -->
+                /*
                 deleteTodo(todoId) { // 하나의 todo를 삭제
                     this.todos = this.todos.filter(todo => todo.id !== todoId);
                     this.updateLocalStorage();
                 },
+                */
 
                 deleteSelection() { // 선택된 복수의 todo를 삭제
                     this.todos = this.todos.filter(todo => !todo.checked);
-                    this.selectedOption = this.todos.length ? this.selectedOption = 'all' : this.selectedOption = 'done';
                     this.updateLocalStorage();
                 },// deleteSelection()-end
 
@@ -203,6 +204,7 @@
             computed: {
                 isAllChecked: {
                     get() { // 하나 이상의 모든 todo가 checked되면 전체 선택 checkbox의 값도 true로 설정
+                        console.log('isAllChekced')
                         return this.todos.length > 0 && this.todos.every(todo => todo.checked);
                     },
                     set(value) { // 전체 선택 checkbox의 값을 모든 todo의 checked 속성에 할당
@@ -213,25 +215,29 @@
                 },// isAllChecked()-end
 
                 filteredTodo() { // todos를 filter()를 사용하여 원하는 데이터 출력
-                    switch(this.selectedOption) {
-                        case 'all':
-                            return this.todos;
-                            break;
+                    let filteredItems = this.todos;
+
+                    switch(this.selectedOption) { // check 상태 값을 필터로 데이터 분류
                         case 'done':
-                            return this.todos.filter(todo => todo.checked);
+                            filteredItems = filteredItems.filter(todo => todo.checked);
                             break;
                         case 'undone':
-                            return this.todos.filter(todo => !todo.checked);
+                            filteredItems = filteredItems.filter(todo => !todo.checked);
                             break;
-                        default: this.todos;
                     }//switch~case()-end
+
+                    switch (this.completedOption) { // completed 상태로 데이터 분류
+                        case 'completed':
+                            filteredItems = filteredItems.filter(todo => todo.completed === 'completed');
+                            break;
+                        case 'uncompleted':
+                            filteredItems = filteredItems.filter(todo => todo.completed === 'uncompleted');
+                            break;
+                    }//switch~case()-end
+                    return filteredItems;
                 },// filteredTodo()-end
 
-                completedTodo() {
-
-                },
-
-                autoSelection() { // select로 필터링 된 완료 또는 미완료 todos들이 전부 삭제 됐을 때, select의 값을 'all'로 바꿈
+                autoSelectionForChecked() { // select로 필터링 된 완료 또는 미완료 todos들이 전부 삭제 됐을 때, select의 값을 'all'로 바꿈
                     const doneTodos = this.todos.filter(todo => todo.checked);
                     const unDoneTodos = this.todos.filter(todo => !todo.checked);
 
@@ -240,7 +246,18 @@
                     } else if(this.selectedOption === 'undone' && !unDoneTodos.length) {
                         return this.selectedOption= 'all';
                     }
-                }// autoSelection()-end
+                }, // autoSelection()-end
+
+                autoSelectionForCompletion() {
+                    const completedTodos = this.todos.filter(todo => todo.completed === 'completed');
+                    const uncompletedTodos = this.todos.filter(todo => todo.completed === 'uncompleted');
+
+                    if(this.completedOption === 'completed' && !completedTodos.length) {
+                        return this.completedOption = 'allCompleted'
+                    } else if(this.completedOption === 'uncompleted' && !uncompletedTodos.length) {
+                        return this.completedOption = 'allCompleted'
+                    }
+                } // autoSelectionForCompletion()-end
 
             },// computed()-end
 
@@ -288,7 +305,6 @@
             text-align: center;
             box-shadow: 0px 2px 4px;
             border-radius: 10px;
-            margin-left: 30px;
             font-weight: bold;
         }
 
@@ -309,16 +325,11 @@
         }
 
 
-        .todoClassStyle {
+        .completedTodoStyle {
             color: red !important;
             font-weight: bolder !important;
             text-decoration: line-through;
             opacity: 0.3;
-        }
-
-        .emptyComment {
-            text-align: center;
-            display: none;
         }
 
         ol {
