@@ -151,7 +151,7 @@
 
                 completeTodo(todoId) { // 완료 버튼 기능 로직
                     const todo = this.todos.find(todo => todo.id === todoId);
-                    if(this.isEmptyException()) { // 공백 유효성 검사
+                    if (this.isEmptyException()) { // 공백 유효성 검사
                         return false;
                     } else {
                         // 요소의 값을 바꿈으로써, text부분과 button의 style을 바꿔 직관적으로 완료의 상태를 표시
