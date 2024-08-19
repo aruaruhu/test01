@@ -57,14 +57,14 @@
         <button class="buttonStyle" @click="deleteSelection">선택 삭제</button>
     
         <!-- 체크항목 필터링 버튼 -->
-        <select id="selectBtn" v-model="selectedOption" :selected="autoSelectionForChecked">
+        <select id="selectBtn" v-model="selectedOption">
             <option value="all" selected>체크 상태</option>
             <option value="done">체크</option>
             <option value="undone">미체크</option>
         </select>
 
         <!-- 완료항목 필터링 버튼 -->
-        <select id="selectBtn" v-model="completedOption" :selected="autoSelectionForCompletion">
+        <select id="selectBtn" v-model="completedOption">
             <option value="allCompleted">완료 상태</option>
             <option value="completed">완료</option>
             <option value="uncompleted">미완료</option>
