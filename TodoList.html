@@ -57,14 +57,14 @@
         <button class="buttonStyle" @click="deleteSelection">선택 삭제</button>
     
         <!-- 체크항목 필터링 버튼 -->
-        <select id="selectBtn" v-model="selectedOption">
+        <select id="selectBtn" v-model="selectedOption" :selected="autoSelectionForChecked">
             <option value="all" selected>체크 상태</option>
             <option value="done">체크</option>
             <option value="undone">미체크</option>
         </select>
-
+        
         <!-- 완료항목 필터링 버튼 -->
-        <select id="selectBtn" v-model="completedOption">
+        <select id="selectBtn" v-model="completedOption" :selected="autoSelectionForCompletion">
             <option value="allCompleted">완료 상태</option>
             <option value="completed">완료</option>
             <option value="uncompleted">미완료</option>
@@ -79,7 +79,6 @@
                     type="checkbox" 
                     v-model="todo.checked"
                     @change="updateLocalStorage"
-                    @click="updateTodo(todo.id)"
                 >
                 <input 
                     type="text" 
@@ -115,7 +114,7 @@
             methods: {
 
                 setId() { // 존재하는 todo의 id 값 중 가장 큰 것을 선택하여 +1 한 값을 반환
-                    if (this.todos.length > 0) {
+                    if (this.todos.length) {
                         this.idNum = Math.max(this.idNum, ...this.todos.map(todo => todo.id));
                     }
                     return ++this.idNum;
@@ -138,8 +137,13 @@
                     if(this.isEmptyException()) { // 공백 유효성 검사
                         return false;
                     } else if(this.message.trim()){ // 할 일 추가하는 로직
-                        this.todos.push({ id: this.setId(), text: this.message, completed : 'uncompleted', 
-                        checked : false, completedTodoStyle : false, completedButtonStyle : false});
+                        this.todos.push({ 
+                            id: this.setId(), 
+                            text: this.message, 
+                            completed : 'uncompleted', 
+                            checked : false, 
+                            completedTodoStyle : false, 
+                            completedButtonStyle : false});
                         this.message = "";
                         this.updateLocalStorage();
                     }
@@ -173,11 +177,10 @@
                 },// deleteSelection()-end
 
                 deleteAll() { // 모든 todo를 삭제
-                    if (this.todos.length > 0) {
+                    if (this.todos.length) {
                         this.todos = [];
                     }
                     this.updateLocalStorage();
-                    this.selectedOption = 'all';
                 },// deleteAll()-end
 
                 toggleAll(e) { // 전체 선택 checkbox의 값으로 computed 속성의 isAllChecked set() 실행
@@ -194,7 +197,7 @@
             computed: {
                 isAllChecked: {
                     get() { // 하나 이상의 모든 todo가 checked되면 전체 선택 checkbox의 값도 true로 설정
-                        return this.todos.length > 0 && this.todos.every(todo => todo.checked);
+                        return this.todos.length && this.todos.every(todo => todo.checked);
                     },
                     set(value) { // 전체 선택 checkbox의 값을 모든 todo의 checked 속성에 할당
                         this.todos.forEach(todo => {
@@ -251,7 +254,7 @@
                 const storedTodos = JSON.parse(localStorage.getItem("todosInLocalStorage"));
                 if (storedTodos) {
                     this.todos = storedTodos;
-                    this.idNum = Math.max(this.idNum, ...this.todos.map(todo => todo.id));
+                    this.idNum = Math.max(this.idNum, ...this.todos.map((todo) => todo.id));
                 }
             },// created()-end
 
