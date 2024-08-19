@@ -117,11 +117,11 @@
                         return false;
                     } else if (this.message.trim()) { // 할 일 추가하는 로직
                         this.todos.push({
-                            id: this.setId(), 
-                            text: this.message, 
+                            id: this.setId(),
+                            text: this.message,
                             completed: 'uncompleted',
-                            checked: false, 
-                            completedTodoStyle: false, 
+                            checked: false,
+                            completedTodoStyle: false,
                             completedButtonStyle: false
                         });
                         this.message = "";
@@ -234,7 +234,7 @@
                 const storedTodos = JSON.parse(localStorage.getItem("todosInLocalStorage"));
                 if (storedTodos) {
                     this.todos = storedTodos;
-                    this.idNum = Math.max(this.idNum, ...this.todos.map(todo => todo.id));
+                    this.idNum = Math.max(this.idNum, ...this.todos.map((todo) => todo.id));
                 }
             },// created()-end
 
