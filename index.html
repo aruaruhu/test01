@@ -11,66 +11,87 @@
 <body>
 
     <div id="app">
-
+    
         <h2>할 일 추가하기</h2>
-
+    
         <!-- 할 일 기입 input  -->
-        <input type="text" v-model="message" placeholder="할 일을 기입해주세요." @keyup.enter="addTodo" id="addInput">
-
+        <input
+            type="text" 
+            v-model="message" 
+            placeholder="할 일을 기입해주세요." 
+            @keyup.enter="addTodo" 
+            id="addInput"
+        >
+    
         <!-- 추가하기 버튼 -->
-        <button class="buttonStyle" @click="addTodo" :disabled="!message? true : false">
-            추가하기
+        <button
+            class="buttonStyle" 
+            @click="addTodo" 
+            :disabled="!message? true : false"
+        >
+        추가하기
         </button>
-
+    
         <br><br>
-
+    
         <!-- 전체 선택 checkbox -->
         <label for="chkAll">
             <input type="checkbox" id="chkAll" :checked="isAllChecked" @change="toggleAll">&nbsp;전체 선택
         </label>
 
         <!-- 완료 항목 전부 삭제 버튼 -->
-        <button class="buttonStyle" style="margin-left: 30px;" @click="deleteAllCompleted">
-            완료 전부 삭제
+        <button
+            class="buttonStyle"
+            style="margin-left: 30px;"
+            @click="deleteAllCompleted"
+        >
+        완료 전부 삭제
         </button>
-
+    
         <br><br>
-
+    
         <!-- 전부 삭제 버튼 -->
         <button class="buttonStyle" @click="deleteAll">전부 삭제</button>
-
+    
         <!-- 선택 삭제 -->
         <button class="buttonStyle" @click="deleteSelection">선택 삭제</button>
-
+    
         <!-- 체크항목 필터링 버튼 -->
         <select id="selectBtn" v-model="selectedOption" :selected="autoSelectionForChecked">
             <option value="all" selected>체크 상태</option>
             <option value="done">체크</option>
             <option value="undone">미체크</option>
         </select>
-
+        
         <!-- 완료항목 필터링 버튼 -->
         <select id="selectBtn" v-model="completedOption" :selected="autoSelectionForCompletion">
             <option value="allCompleted">완료 상태</option>
             <option value="completed">완료</option>
             <option value="uncompleted">미완료</option>
         </select>
-
+    
         <!-- 할 일 내용 칸 -->
         <ol>
             <span v-if="!todos.length">할 일이 없습니다.</span>
-
+    
             <li v-for="(todo, id) in filteredTodo" :key="todo.id">
-                <input type="checkbox" v-model="todo.checked" @change="updateLocalStorage">
-                <input type="text" v-model="todo.text"
+                <input 
+                    type="checkbox" 
+                    v-model="todo.checked"
+                    @change="updateLocalStorage"
+                >
+                <input 
+                    type="text" 
+                    v-model="todo.text" 
                     :style="{fontWeight:fontWeight,borderRadius:borderRadius,border:border}"
-                    :class="{completedTodoStyle : todo.completedTodoStyle}">
+                    :class="{completedTodoStyle : todo.completedTodoStyle}"
+                >
                 <button class="buttonStyle" @click="updateTodo(todo.id)">수정</button>
-                <button class="buttonStyle" @click="completeTodo(todo.id)"
-                    :class="{completedButtonStyle : todo.completedButtonStyle}">완료</button>
+                <button class="buttonStyle" @click="completeTodo(todo.id)" 
+                        :class="{completedButtonStyle : todo.completedButtonStyle}">완료</button>
             </li>
         </ol>
-
+    
     </div>
 
     <script>
@@ -98,12 +119,12 @@
                     }
                     return ++this.idNum;
                 },// setId()-end
-
+                
                 isEmptyException() {
                     // 항목 중 공백으로 된 text를 확인, boolean 값으로 반환
-                    const isEmptyTodo = this.todos.some(todo => todo.text === '');
+                    const isEmptyTodo = this.todos.some(todo => todo.text === ''); 
                     // 항목 중 공백으로 된 text를 찾아서 index 값을 반환
-                    const todoIndex = this.todos.findIndex(todo => todo.text === '');
+                    const todoIndex = this.todos.findIndex(todo => todo.text === ''); 
                     if (isEmptyTodo) {
                         alert((todoIndex + 1) + "번째 항목을 공백으로 남긴채 진행할 수 없습니다.\n할 일을 기입하거나 삭제 해주세요.");
                         window.event.preventDefault();
@@ -113,17 +134,16 @@
                 },// isEmptyException()-end
 
                 addTodo() { // 할 일 추가하기
-                    if (this.isEmptyException()) { // 공백 유효성 검사
+                    if(this.isEmptyException()) { // 공백 유효성 검사
                         return false;
-                    } else if (this.message.trim()) { // 할 일 추가하는 로직
-                        this.todos.push({
-                            id: this.setId(),
-                            text: this.message,
-                            completed: 'uncompleted',
-                            checked: false,
-                            completedTodoStyle: false,
-                            completedButtonStyle: false
-                        });
+                    } else if(this.message.trim()){ // 할 일 추가하는 로직
+                        this.todos.push({ 
+                            id: this.setId(), 
+                            text: this.message, 
+                            completed : 'uncompleted', 
+                            checked : false, 
+                            completedTodoStyle : false, 
+                            completedButtonStyle : false});
                         this.message = "";
                         this.updateLocalStorage();
                     }
@@ -148,7 +168,7 @@
                 }, // deleteAllCompleted()-end
 
                 updateTodo(todoId) { // 텍스트 수정 함수
-                    this.updateLocalStorage();
+                        this.updateLocalStorage();
                 },// updateTodo()-end
 
                 deleteSelection() { // 선택된 복수의 todo를 삭제
@@ -167,6 +187,12 @@
                     this.isAllChecked = e.target.checked;
                     this.updateLocalStorage();
                 },// toggleAll()-end
+
+                resetChecks() { // 완료 상태 값이 변하면 check 값이 false로 바뀐다.
+                    this.todos.forEach((todo) => {
+                        todo.checked = false;
+                    })
+                },
 
                 updateLocalStorage() { // localStorage를 최신화한다.
                     localStorage.setItem("todosInLocalStorage", JSON.stringify(this.todos));
@@ -213,19 +239,20 @@
                 autoSelectionForChecked() { // select로 필터링 된 체크 또는 미체크 todos들이 전부 삭제 됐을 때, select의 값을 'all'로 바꿈
                     const doneTodos = this.todos.filter(todo => todo.checked);
                     const unDoneTodos = this.todos.filter(todo => !todo.checked);
-                    if (this.selectedOption === 'done' && !doneTodos.length ||
+                    if(this.selectedOption === 'done' && !doneTodos.length ||
                         this.selectedOption === 'undone' && !unDoneTodos.length) {
                         return this.selectedOption = 'all';
-                    }
+                    } 
                 }, // autoSelection()-end
 
                 autoSelectionForCompletion() { // select로 필터링 된 완료 또는 미완료 todos들이 전부 삭제 됐을 때, select의 값을 'allCompleted'로 바꿈
                     const completedTodos = this.todos.filter(todo => todo.completed === 'completed');
                     const uncompletedTodos = this.todos.filter(todo => todo.completed === 'uncompleted');
-                    if (this.completedOption === 'completed' && !completedTodos.length ||
+                    if(this.completedOption === 'completed' && !completedTodos.length ||
                         this.completedOption === 'uncompleted' && !uncompletedTodos.length) {
                         return this.completedOption = 'allCompleted'
                     }
+                    this.resetChecks();
                 } // autoSelectionForCompletion()-end
 
             },// computed()-end

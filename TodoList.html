@@ -188,6 +188,12 @@
                     this.updateLocalStorage();
                 },// toggleAll()-end
 
+                resetChecks() { // 완료 상태 값이 변하면 check 값이 false로 바뀐다.
+                    this.todos.forEach((todo) => {
+                        todo.checked = false;
+                    })
+                },
+
                 updateLocalStorage() { // localStorage를 최신화한다.
                     localStorage.setItem("todosInLocalStorage", JSON.stringify(this.todos));
                 },// updateLocalStorage()-end
@@ -246,6 +252,7 @@
                         this.completedOption === 'uncompleted' && !uncompletedTodos.length) {
                         return this.completedOption = 'allCompleted'
                     }
+                    this.resetChecks();
                 } // autoSelectionForCompletion()-end
 
             },// computed()-end
